@@ -1,0 +1,168 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+#nullable disable
+
+namespace ResturantAPI.Models
+{
+    public partial class resturantdbContext : DbContext
+    {
+        public bool IgnoreFilter { get; set; }
+        public resturantdbContext()
+        {
+        }
+
+        public resturantdbContext(DbContextOptions<resturantdbContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Customer> Customers { get; set; }
+        public virtual DbSet<Customerorder> Customerorders { get; set; }
+        public virtual DbSet<Restaurantmenu> Restaurantmenus { get; set; }
+        public virtual DbSet<Resturant> Resturants { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMySQL("Server=localhost;port=3306;user=root;password=anmmn59;database=resturantdb;");
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Customer>(entity =>
+            {
+                entity.ToTable("customer");
+
+                entity.HasIndex(e => e.Id, "Id_UNIQUE")
+                    .IsUnique();
+
+                entity.Property(e => e.Archived).HasColumnType("tinyint");
+
+                entity.Property(e => e.FirstName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("firstName")
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.LastName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.CreatedDateUTC)
+                    .HasColumnName("CreatedDate")
+                    .HasColumnType("TIMESTAMP")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedDateUTC)
+                    .HasColumnName("UpdatedDate")
+                    .HasColumnType("TIMESTAMP")
+                    .ValueGeneratedOnAddOrUpdate().
+                    HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            modelBuilder.Entity<Customerorder>(entity =>
+            {
+                entity.HasIndex(e => e.Id, "Id_UNIQUE")
+                    .IsUnique();
+
+                entity.ToTable("customerorder");
+                entity.Property(e => e.Archived).HasColumnType("tinyint");
+
+                entity.HasIndex(e => e.CustomerId, "CustomerId_idx");
+
+                entity.HasIndex(e => e.MealId, "MealId_idx");
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany()
+                    .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("CustomerId");
+
+                entity.HasOne(d => d.Meal)
+                    .WithMany()
+                    .HasForeignKey(d => d.MealId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("MealId");
+            });
+
+            modelBuilder.Entity<Restaurantmenu>(entity =>
+            {
+                entity.ToTable("restaurantmenu");
+
+                entity.HasIndex(e => e.ResturantId, "ResturantId_idx");
+
+                entity.Property(e => e.Archived).HasColumnType("tinyint");
+
+                entity.Property(e => e.MealName)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.PriceInNis).HasColumnType("decimal(10,2)");
+
+                entity.Property(e => e.PriceInUsd).HasColumnType("decimal(10,2)");
+
+                entity.Property(e => e.CreatedDateUTC)
+                    .HasColumnName("CreatedDate")
+                    .HasColumnType("TIMESTAMP")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedDateUTC)
+                    .HasColumnName("UpdatedDate")
+                    .HasColumnType("TIMESTAMP")
+                    .ValueGeneratedOnAddOrUpdate().
+                    HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.Resturant)
+                    .WithMany(p => p.Restaurantmenus)
+                    .HasForeignKey(d => d.ResturantId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("ResturantId");
+            });
+
+            modelBuilder.Entity<Resturant>(entity =>
+            {
+                entity.ToTable("resturant");
+
+                entity.HasIndex(e => e.Id, "Id_UNIQUE")
+                    .IsUnique();
+
+                entity.Property(e => e.Archived).HasColumnType("tinyint");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.PhoneNumber)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasDefaultValueSql("''");
+
+                entity.Property(e => e.CreatedDateUTC)
+                    .HasColumnName("CreatedDate")
+                    .HasColumnType("TIMESTAMP")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.UpdatedDateUTC)
+                    .HasColumnName("UpdatedDate")
+                    .HasColumnType("TIMESTAMP")
+                    .ValueGeneratedOnAddOrUpdate().
+                    HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            modelBuilder.Entity<Customer>().HasQueryFilter(a => !a.Archived);
+            modelBuilder.Entity<Restaurantmenu>().HasQueryFilter(a => !a.Archived);
+            modelBuilder.Entity<Resturant>().HasQueryFilter(a => !a.Archived);
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    }
+}
