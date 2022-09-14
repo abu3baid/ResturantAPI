@@ -1,14 +1,14 @@
-﻿using ResturantAPI.Dtos;
-using ResturantAPI.Models;
-using System.Collections.Generic;
-using System;
+﻿using System.Collections.Generic;
 using System.Linq;
+using ResturantAPI.Dtos;
+using ResturantAPI.Extensions;
+using ResturantAPI.Models;
 
 namespace ResturantAPI.Services
 {
     public class ResturantService : IResturantService
     {
-        private resturantdbContext _db;
+        private readonly resturantdbContext _db;
 
         public ResturantService(resturantdbContext db)
         {
@@ -31,8 +31,8 @@ namespace ResturantAPI.Services
         {
             var resturant = new Resturant
             {
-                Name = dto.Name,
-                PhoneNumber = dto.PhoneNumber,
+                Name = dto.Name.CapitalizeFirstChar(),
+                PhoneNumber = dto.PhoneNumber
             };
             _db.Resturants.Add(resturant);
             _db.SaveChanges();
@@ -41,21 +41,13 @@ namespace ResturantAPI.Services
 
         public int Update(UpdateResturantDto dto)
         {
-            try
-            {
-                var resturant = _db.Resturants.Find(dto.Id);
-                resturant.Id = dto.Id;
-                resturant.Name = dto.Name;
-                resturant.PhoneNumber = dto.PhoneNumber;
-                _db.Resturants.Update(resturant);
-                _db.SaveChanges();
-                return resturant.Id;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return -1;
-            }
+            var resturant = _db.Resturants.Find(dto.Id);
+            resturant.Id = dto.Id;
+            resturant.Name = dto.Name.CapitalizeFirstChar();
+            resturant.PhoneNumber = dto.PhoneNumber;
+            _db.Resturants.Update(resturant);
+            _db.SaveChanges();
+            return resturant.Id;
         }
 
         public void Delete(int Id)

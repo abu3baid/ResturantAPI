@@ -10,9 +10,10 @@ namespace ResturantAPI.Models
         public int Id { get; set; }
         public int MealId { get; set; }
         public int CustomerId { get; set; }
+        public int OrderQuantity { get; set; }
         public bool Archived { get; set; }
         public virtual Customer Customer { get; set; }
-        public virtual Restaurantmenu Meal { get; set; }
+        public virtual Resturantmenu Meal { get; set; }
 
     }
 }

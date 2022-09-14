@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -20,7 +21,7 @@ namespace ResturantAPI.Models
 
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Customerorder> Customerorders { get; set; }
-        public virtual DbSet<Restaurantmenu> Restaurantmenus { get; set; }
+        public virtual DbSet<Resturantmenu> Resturantmenus { get; set; }
         public virtual DbSet<Resturant> Resturants { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -77,11 +78,15 @@ namespace ResturantAPI.Models
 
                 entity.HasIndex(e => e.MealId, "MealId_idx");
 
+
+                entity.Property(e => e.OrderQuantity).HasColumnType("int");
+
                 entity.HasOne(d => d.Customer)
                     .WithMany()
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("CustomerId");
+
 
                 entity.HasOne(d => d.Meal)
                     .WithMany()
@@ -90,9 +95,9 @@ namespace ResturantAPI.Models
                     .HasConstraintName("MealId");
             });
 
-            modelBuilder.Entity<Restaurantmenu>(entity =>
+            modelBuilder.Entity<Resturantmenu>(entity =>
             {
-                entity.ToTable("restaurantmenu");
+                entity.ToTable("resturantmenu");
 
                 entity.HasIndex(e => e.ResturantId, "ResturantId_idx");
 
@@ -106,6 +111,7 @@ namespace ResturantAPI.Models
                 entity.Property(e => e.PriceInNis).HasColumnType("decimal(10,2)");
 
                 entity.Property(e => e.PriceInUsd).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.Quantity).HasColumnType("int");
 
                 entity.Property(e => e.CreatedDateUTC)
                     .HasColumnName("CreatedDate")
@@ -119,7 +125,7 @@ namespace ResturantAPI.Models
                     HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                 entity.HasOne(d => d.Resturant)
-                    .WithMany(p => p.Restaurantmenus)
+                    .WithMany(p => p.Resturantmenus)
                     .HasForeignKey(d => d.ResturantId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("ResturantId");
@@ -157,7 +163,7 @@ namespace ResturantAPI.Models
             });
 
             modelBuilder.Entity<Customer>().HasQueryFilter(a => !a.Archived);
-            modelBuilder.Entity<Restaurantmenu>().HasQueryFilter(a => !a.Archived);
+            modelBuilder.Entity<Resturantmenu>().HasQueryFilter(a => !a.Archived);
             modelBuilder.Entity<Resturant>().HasQueryFilter(a => !a.Archived);
 
             OnModelCreatingPartial(modelBuilder);

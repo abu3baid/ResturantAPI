@@ -10,7 +10,7 @@ namespace ResturantAPI.Models
     {
         public Resturant()
         {
-            Restaurantmenus = new HashSet<Restaurantmenu>();
+            Resturantmenus = new HashSet<Resturantmenu>();
         }
 
         public int Id { get; set; }
@@ -22,6 +22,6 @@ namespace ResturantAPI.Models
         public DateTime UpdatedDateUTC { get; set; }
         public bool Archived { get; set; }
 
-        public virtual ICollection<Restaurantmenu> Restaurantmenus { get; set; }
+        public virtual ICollection<Resturantmenu> Resturantmenus { get; set; }
     }
 }

@@ -1,14 +1,14 @@
-﻿using ResturantAPI.Dtos;
-using ResturantAPI.Models;
-using System.Collections.Generic;
-using System;
+﻿using System.Collections.Generic;
+using System.Data.OleDb;
 using System.Linq;
+using ResturantAPI.Dtos;
+using ResturantAPI.Models;
 
 namespace ResturantAPI.Services
 {
     public class CustomerOrderService : ICustomerOrderService
     {
-        private resturantdbContext _db;
+        private readonly resturantdbContext _db;
 
         public CustomerOrderService(resturantdbContext db)
         {
@@ -29,31 +29,57 @@ namespace ResturantAPI.Services
 
         public int Order(CreateCustomerOrderDto dto)
         {
-            var order = new Customerorder
+            var Check = IsAvailable(dto.MealId);
+            var resMenu = _db.Resturantmenus.Find(dto.MealId);
+            if (Check)
             {
-                MealId = dto.MealId,
-                CustomerId = dto.CustomerId
-            };
-            _db.Customerorders.Add(order);
-            _db.SaveChanges();
-            return order.MealId;
+                var order = new Customerorder
+                {
+                    MealId = dto.MealId,
+                    CustomerId = dto.CustomerId,
+                    OrderQuantity = dto.OrderQuantity
+                };
+                _db.Customerorders.Add(order);
+                resMenu.Quantity = resMenu.Quantity - order.OrderQuantity;
+                _db.SaveChanges();
+                return order.Id;
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         public int UpdateOrder(UpdateCustomerOrderDto dto)
         {
-            try
+            var Check = IsAvailable(dto.MealId);
+            var resturantMenu = _db.Resturantmenus.Find(dto.MealId);
+            var res = 0;
+            if (Check)
             {
-                var order = _db.Customerorders.Find(dto.Id);
-                order.Id = dto.Id;
-                order.MealId = dto.MealId;
-                order.CustomerId = dto.CustomerId;
-                _db.Customerorders.Update(order);
+                var newQuantity = dto.OrderQuantity;
+                var db = _db.Customerorders.Find(dto.Id);
+                var oldQuantity = db.OrderQuantity;
+                db.Id = dto.Id;
+                db.MealId = dto.MealId;
+                db.CustomerId = dto.CustomerId;
+                db.OrderQuantity = dto.OrderQuantity;
+                if (newQuantity > oldQuantity)
+                {
+                    res = newQuantity - oldQuantity;
+                    resturantMenu.Quantity -= res;
+                }
+                else
+                {
+                    res = oldQuantity - newQuantity;
+                    resturantMenu.Quantity += res;
+                }
+                _db.Customerorders.Update(db);
                 _db.SaveChanges();
-                return order.Id;
+                return db.Id;
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine(e);
                 return -1;
             }
         }
@@ -61,8 +87,20 @@ namespace ResturantAPI.Services
         public void DeleteOrder(int Id)
         {
             var order = _db.Customerorders.Find(Id);
+            var resMenu = _db.Resturantmenus.Find(order.MealId);
+            resMenu.Quantity += 1;
             order.Archived = true;
             _db.SaveChanges();
         }
+
+        public bool IsAvailable(int id)
+        {
+            var db = _db.Resturantmenus.Find(id);
+            if (db.Quantity > 0)
+                return true;
+            else
+                return false;
+        }
+
     }
 }

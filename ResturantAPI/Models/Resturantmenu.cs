@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ResturantAPI.Models
 {
-    public partial class Restaurantmenu
+    public partial class Resturantmenu
     {
         public int Id { get; set; }
         public string MealName { get; set; }
