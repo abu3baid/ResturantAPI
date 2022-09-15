@@ -23,6 +23,7 @@ namespace ResturantAPI.Models
         public virtual DbSet<Customerorder> Customerorders { get; set; }
         public virtual DbSet<Resturantmenu> Resturantmenus { get; set; }
         public virtual DbSet<Resturant> Resturants { get; set; }
+        public virtual DbSet<CsvView> CsvViews { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -34,6 +35,21 @@ namespace ResturantAPI.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<CsvView>(entity =>
+            {
+                entity.ToTable("csvview");
+                entity.HasNoKey();
+
+                entity.Property(e => e.RestaurantName).HasColumnType("varchar(255)");
+                entity.Property(e => e.NumberOfOrderedCustomer).HasColumnType("decimal(32,0)");
+                entity.Property(e => e.ProfitInUsd).HasColumnType("decimal(42,2)");
+                entity.Property(e => e.ProfitInNis).HasColumnType("decimal(42,2)");
+                entity.Property(e => e.TheBestSellingMeal).HasColumnType("varchar(255)");
+                entity.Property(e => e.MostPurchasedCustomer).HasColumnType("varchar(511)");
+            });
+
+
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.ToTable("customer");
