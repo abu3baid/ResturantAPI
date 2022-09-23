@@ -14,7 +14,7 @@ namespace ResturantAPI.Models
         [Timestamp]
         public DateTime CreatedDateUTC { get; set; }
         [Timestamp]
-        public DateTime UpdatedDateUTC { get; set; }
+        public DateTime UpdatedDateUtc { get; set; }
         public bool Archived { get; set; }
     }
 }

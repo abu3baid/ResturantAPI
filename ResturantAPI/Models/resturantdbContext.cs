@@ -75,7 +75,7 @@ namespace ResturantAPI.Models
                     .HasColumnType("TIMESTAMP")
                     .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                entity.Property(e => e.UpdatedDateUTC)
+                entity.Property(e => e.UpdatedDateUtc)
                     .HasColumnName("UpdatedDate")
                     .HasColumnType("TIMESTAMP")
                     .ValueGeneratedOnAddOrUpdate().
